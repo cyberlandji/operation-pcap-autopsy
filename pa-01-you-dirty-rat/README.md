@@ -1,5 +1,12 @@
 # PA-01 — STRRAT C2 Detection Suite
 
+![Operation PCAP Autopsy](https://img.shields.io/badge/Operation-PCAP_Autopsy-0D1117?style=for-the-badge)
+![PA-01](https://img.shields.io/badge/PA--01-You_Dirty_Rat!-blue?style=for-the-badge)
+![STRRAT](https://img.shields.io/badge/Malware-STRRAT-red?style=for-the-badge)
+![Suricata](https://img.shields.io/badge/Suricata-E95420?style=for-the-badge&logo=suricata&logoColor=white)
+![Rules: 3 Validated](https://img.shields.io/badge/Rules-3_Validated-brightgreen?style=for-the-badge)
+![MITRE ATT&CK](https://img.shields.io/badge/MITRE_ATT%26CK-EF3B2D?style=for-the-badge)
+
 **PCAP Source:** [malware-traffic-analysis.net — "You Dirty Rat!" (2024-07-30)](https://www.malware-traffic-analysis.net/2024/07/30/index.html)  
 **Malware Family:** STRRAT (Java-based RAT)  
 **Rules Engine:** Suricata 8.0.3  
