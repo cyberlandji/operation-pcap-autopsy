@@ -1,5 +1,11 @@
 # Operation PCAP Autopsy — Detection Rule Development
 
+![Operation PCAP Autopsy](https://img.shields.io/badge/Operation-PCAP_Autopsy-0D1117?style=for-the-badge)
+![Phase: Detection Engineering](https://img.shields.io/badge/Phase-Detection_Engineering-blueviolet?style=for-the-badge)
+![Suricata](https://img.shields.io/badge/Suricata-E95420?style=for-the-badge&logo=suricata&logoColor=white)
+![Wireshark](https://img.shields.io/badge/Wireshark-1679A7?style=for-the-badge&logo=wireshark&logoColor=white)
+![MITRE ATT&CK](https://img.shields.io/badge/MITRE_ATT%26CK-EF3B2D?style=for-the-badge)
+
 Detection rules written, validated, and documented from real-world malicious network traffic. Each operation takes a PCAP containing actual malware activity, reconstructs the attack chain, and produces **tested Suricata rules** with proof they fire against the original traffic.
 
 **Author:** [cyberlandji.com](https://cyberlandji.com) — [GitHub](https://github.com/cyberlandji)
