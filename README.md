@@ -26,7 +26,7 @@ Every rule in this repository has been validated via offline PCAP replay using S
 
 | Operation | Malware | Rules | Engine | Status |
 |-----------|---------|-------|--------|--------|
-| [PA-01](PA-01_you-dirty-rat/) | STRRAT (Java RAT) | 3 Suricata | Suricata 8.0.3 | ✅ Validated |
+| [PA-01](pa-01_you-dirty-rat/) | STRRAT (Java RAT) | 3 Suricata | Suricata 8.0.3 | ✅ Validated |
 
 ---
 
