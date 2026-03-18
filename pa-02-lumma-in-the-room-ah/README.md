@@ -132,18 +132,17 @@ This operation was deliberately chosen because Lumma's HTTP-based exfiltration a
 ## 📂 Folder Structure
 
 ```
-PA-02_Lumma-in-the-Room-ah/
+pa-02-lumma-in-the-room-ah/
 ├── README.md                          # This file
-├── detection-rules/
+├── rules/
 │   └── PA-02.rules                    # 13 Suricata rules (DNS + TLS + HTTP)
 ├── iocs/
 │   └── PA-02_IOCs.csv                 # Structured IOC export
-├── evidence/
-│   └── screenshots/                   # Wireshark analysis + fast.log validation
+├── validation/
+│   └── screenshots/                   # fast.log validation evidence
 ├── report/
 │   └── PA-02_Final_Investigation_Report.md
-└── notes/
-    └── PA-02_Investigation_Notes.md   # Working notes & concepts reference
+└── lessons-learned.md                 # Key concepts & series progression
 ```
 
 ---
@@ -165,7 +164,7 @@ PA-02_Lumma-in-the-Room-ah/
 
 | Exercise | Focus | Rules | Status |
 |----------|-------|-------|--------|
-| [PA-01: You Dirty Rat!](../PA-01_You-Dirty-Rat) | STRRAT — behavioral Suricata rules | 3 | ✅ Complete |
+| [PA-01: You Dirty Rat!](../pa-01-you-dirty-rat) | STRRAT — behavioral Suricata rules | 3 | ✅ Complete |
 | **PA-02: Lumma in the Room-ah** | **Lumma Stealer — content-match + layered detection** | **13** | **✅ Complete** |
 
 ---
