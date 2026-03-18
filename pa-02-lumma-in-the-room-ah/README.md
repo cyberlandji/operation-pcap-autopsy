@@ -164,7 +164,7 @@ pa-02-lumma-in-the-room-ah/
 
 | Exercise | Focus | Rules | Status |
 |----------|-------|-------|--------|
-| [PA-01: You Dirty Rat!](../tree/main/pa-01-you-dirty-rat) | STRRAT — behavioral Suricata rules | 3 | ✅ Complete |
+| [PA-01: You Dirty Rat!](../pa-01-you-dirty-rat) | STRRAT — behavioral Suricata rules | 3 | ✅ Complete |
 | **PA-02: Lumma in the Room-ah** | **Lumma Stealer — content-match + layered detection** | **13** | **✅ Complete** |
 
 ---
