@@ -35,7 +35,7 @@ Every rule in this repository has been validated via offline PCAP replay using S
 ```
 operation-pcap-autopsy/
 ├── README.md                          ← You are here
-├── PA-01_you-dirty-rat/
+├── pa-01_you-dirty-rat/
 │   ├── README.md                      ← Detection-focused write-up
 │   ├── rules/
 │   │   └── PA-01.rules                ← Validated Suricata rules
@@ -45,7 +45,7 @@ operation-pcap-autopsy/
 │   ├── iocs/
 │   │   └── PA-01_IOCs.csv             ← Structured IOC export
 │   └── lessons-learned.md             ← Walkthrough comparison + corrections
-├── PA-02_.../
+├── pa-02_.../
 │   └── ...
 └── templates/
     └── ...
