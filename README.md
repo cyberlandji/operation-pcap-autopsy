@@ -1,157 +1,73 @@
-# 🔍 PA-02 — "Lumma in the Room-ah"
-## Lumma Stealer — Layered Infrastructure & Content-Match Detection
+# 🔍 Operation PCAP Autopsy
+## Detection-First PCAP Analysis — Real-World Malware Traffic
 
-[![Status](https://img.shields.io/badge/status-complete-brightgreen)](https://github.com/cyberlandji/operation-pcap-autopsy)
-[![Malware](https://img.shields.io/badge/malware-Lumma%20Stealer-red)](https://github.com/cyberlandji/operation-pcap-autopsy)
-[![Rules](https://img.shields.io/badge/suricata%20rules-13-blue)](https://github.com/cyberlandji/operation-pcap-autopsy)
-[![Validated](https://img.shields.io/badge/validated-12%2F13%20firing-brightgreen)](https://github.com/cyberlandji/operation-pcap-autopsy)
-[![MITRE ATT&CK](https://img.shields.io/badge/MITRE%20ATT%26CK-10%20techniques-orange)](https://github.com/cyberlandji/operation-pcap-autopsy)
+[![Series](https://img.shields.io/badge/series-Operation%20PCAP%20Autopsy-blue)](https://github.com/cyberlandji/operation-pcap-autopsy)
+[![Focus](https://img.shields.io/badge/focus-Detection%20Rule%20Development%20%26%20Network%20Forensics-teal)](https://github.com/cyberlandji/operation-pcap-autopsy)
+
+[![Wireshark](https://img.shields.io/badge/tool-Wireshark-blue)](https://www.wireshark.org/)
+[![Suricata](https://img.shields.io/badge/tool-Suricata-orange)](https://suricata.io/)
+[![Linux](https://img.shields.io/badge/tool-Linux-yellow)](https://www.linux.org/)
+[![Detection Engineering](https://img.shields.io/badge/skill-Detection%20Engineering-purple)](https://github.com/cyberlandji/operation-pcap-autopsy)
+[![MITRE ATT&CK](https://img.shields.io/badge/framework-MITRE%20ATT%26CK-red)](https://attack.mitre.org/)
 
 ---
 
 ## 📌 Overview
 
-PA-02 investigates a **Lumma Stealer** infection identified on a Windows workstation. The malware operated through a **five-domain layered infrastructure** — three Cloudflare-fronted delivery domains, one staging server, and one direct C2 server — to exfiltrate browser credentials, cookies, and system fingerprint data via HTTP POST requests.
+Operation PCAP Autopsy is a detection-focused investigation series built on real-world malware traffic sourced from [malware-traffic-analysis.net](https://www.malware-traffic-analysis.net).
 
-This operation was deliberately chosen because Lumma's HTTP-based exfiltration allows **content-match Suricata rules** — the opposite of PA-01 (STRRAT) where encrypted C2 forced behavioral-only detection. Together, the two operations demonstrate that a detection engineer must master both approaches.
+Each operation targets a different malware family. The workflow is consistent: analyze the traffic, extract IOCs, map to MITRE ATT&CK, write Suricata detection rules based on observed behavior, and prove they fire. Every rule is validated on a dedicated SOC STATION via PCAP replay — not assumed to work.
 
-**Key investigation findings:**
-- Cloudflare Encrypted Client Hello (ECH) hides delivery domains from TLS inspection — DNS is the only reliable detection layer
-- Two-phase C2 connection pattern with distinct JA3 fingerprints (check-in vs exfil module)
-- Automated exfiltration of browser fingerprints, credentials, and session tokens via `/api/set_agent`
+This series complements Operation Iron Watch. Where Iron Watch proves I can build detection infrastructure, PCAP Autopsy proves I can investigate malicious traffic and write detections that actually catch it.
 
 ---
 
-## 🎯 Detection Rules Summary
+## 🎯 What This Series Covers
 
-13 Suricata rules across 3 detection layers — **12/13 validated against source PCAP.**
-
-| Layer | Rules | Coverage |
-|-------|-------|----------|
-| DNS | 5 rules (SID 100001–100005) | All 5 malicious domains — earliest detection point |
-| TLS SNI + JA3 | 5 rules (SID 100006–100010) | Domain confirmation + JA3 exfil module correlation |
-| HTTP Content | 3 rules (SID 100011–100013) | C2 host match, POST /api/set_agent, behavioral (domain-agnostic) |
-
-**Rule 100006 (TLS SNI for hiyter.com) — documented non-detection.** Cloudflare ECH hides the real domain in the SNI field. DNS rule 100001 compensates — validating the layered detection approach.
-
----
-
-## 🏗️ Kill Chain
-
-```
-[?] INITIAL ACCESS — HTTPS redirect (not visible in PCAP)
-     Assessed: Drive-by compromise (T1189) — HIGH CONFIDENCE
- ↓
-[✓] INITIAL BEACON — hiyter.com (104.21.22.231 / Cloudflare)
-     ~45s — DNS query + TLS handshake, SNI hidden by ECH
- ↓
-[✓] PAYLOAD DELIVERY — media.megafilehub4.lat + arch.filemegahab4.sbs
-     ~45-48s — Both Cloudflare-fronted, redundant delivery
- ↓
-[✓] STAGING/CONFIG — whooptm.cyou (62.72.32.156)
-     ~90s — Direct IP, no CDN
- ↓
-[✓] C2 EXFILTRATION — whitepepper.su (153.92.1.49)
-     ~92s — Golang C2, HTTP POST to /api/set_agent
-     Two JA3 fingerprints: check-in session + exfil session
-     Automated browser credential & fingerprint theft
-```
+- PCAP-driven malware traffic analysis (Wireshark)
+- IOC extraction and MITRE ATT&CK mapping
+- Suricata detection rule writing and validation
+- Behavioral detection design (encrypted C2 constraints)
+- Content-match detection design (HTTP-based C2)
+- JA3 TLS fingerprinting and correlation
+- PCAP replay testing methodology
+- Investigation documentation and analytical reasoning
 
 ---
 
-## 🖥️ Victim Details
+## 📊 Series Table
 
-| Detail | Value |
-|--------|-------|
-| IP Address | 10.1.21.58 |
-| MAC Address | 00:21:5d:c8:0e:f2 |
-| Hostname | DESKTOP-ES9F3ML |
-| User Account | gwyatt |
-| Full Name | Gabriel Wyatt |
+| Exercise | Malware | Rules | Validated | Key Finding | Status |
+|----------|---------|-------|-----------|-------------|--------|
+| [PA-01: You Dirty Rat!](pa-01-you-dirty-rat) | STRRAT (Java-based RAT) | 3 | 3/3 | Encrypted C2 defeats content-match rules — behavioral detection required | ✅ Complete |
+| [PA-02: Lumma in the Room-ah](pa-02-lumma-in-the-room-ah) | Lumma Stealer (infostealer) | 13 | 12/13 | Layered detection compensates when Cloudflare ECH blinds TLS inspection | ✅ Complete |
 
 ---
 
-## 🔗 Infrastructure
+## 🔧 Methodology
 
-| Domain | IP | Role | Infrastructure |
-|--------|-----|------|----------------|
-| hiyter.com | 104.21.22.231 | Initial beacon | Cloudflare (ECH) |
-| media.megafilehub4.lat | 104.21.48.156 | Payload delivery | Cloudflare |
-| arch.filemegahab4.sbs | 104.17.25.14 | Payload delivery (redundancy) | Cloudflare |
-| whooptm.cyou | 62.72.32.156 | Staging/config | Direct |
-| whitepepper.su | 153.92.1.49 | C2 exfiltration | Direct |
+Every operation follows the same repeatable workflow:
 
----
+**Phase 1 — Orientation:** Open PCAP, identify victim (IP, hostname, user account, domain), note packet count and time span.
 
-## 🧬 MITRE ATT&CK Mapping
+**Phase 2 — Traffic Analysis:** Identify infection vector, map C2 communications, extract artifacts, follow the kill chain from initial access to exfiltration.
 
-| Tactic | Technique | Name | Confidence |
-|--------|-----------|------|------------|
-| Initial Access | T1189 | Drive-by Compromise | HIGH — assessed |
-| Execution | T1204.002 | User Execution: Malicious File | LOW — endpoint data required |
-| Defense Evasion | T1090.004 | Proxy: Domain Fronting | CONFIRMED |
-| Defense Evasion | T1036 | Masquerading | CONFIRMED |
-| Discovery | T1082 | System Information Discovery | CONFIRMED |
-| Command & Control | T1071.001 | Web Protocols | CONFIRMED |
-| Command & Control | T1104 | Multi-Stage Channels | CONFIRMED |
-| Command & Control | T1573.002 | Encrypted Channel | CONFIRMED |
-| Exfiltration | T1020 | Automated Exfiltration | CONFIRMED |
-| Exfiltration | T1041 | Exfiltration Over C2 Channel | CONFIRMED |
+**Phase 3 — IOC Extraction:** Compile malicious IPs, domains, URIs, hashes, User-Agents, JA3 fingerprints. Enrich via VirusTotal, AbuseIPDB, WHOIS.
+
+**Phase 4 — ATT&CK Mapping:** Map every observed action to MITRE ATT&CK techniques. Only what can be proven from the traffic — not assumptions.
+
+**Phase 5 — Detection Rule Writing:** Write Suricata rules targeting the observed behavior. Broad rules for coverage, precision rules for confidence.
+
+**Phase 6 — Validation:** Replay the original PCAP through Suricata with custom rules. If it doesn't fire, it's not a detection — it's a guess.
 
 ---
 
-## 📊 Validation Results
-
-| SID | Layer | Target | Result |
-|-----|-------|--------|--------|
-| 100001 | DNS | hiyter.com | ✅ |
-| 100002 | DNS | arch.filemegahab4.sbs | ✅ |
-| 100003 | DNS | media.megafilehub4.lat | ✅ |
-| 100004 | DNS | whooptm.cyou | ✅ |
-| 100005 | DNS | whitepepper.su | ✅ |
-| 100006 | TLS SNI | hiyter.com | ❌ Expected — ECH |
-| 100007 | TLS SNI | whooptm.cyou | ✅ |
-| 100008 | TLS SNI | media.megafilehub4.lat | ✅ |
-| 100009 | TLS SNI | whitepepper.su | ✅ |
-| 100010 | JA3+SNI | whitepepper.su + JA3 | ✅ |
-| 100011 | HTTP | whitepepper.su host | ✅ |
-| 100012 | HTTP | POST /api/set_agent | ✅ |
-| 100013 | HTTP | Behavioral (no domain) | ✅ |
-
----
-
-## 🔧 Troubleshooting
-
-| Issue | Root Cause | Fix |
-|-------|-----------|-----|
-| Rules 100011/100012 parsing error | `nocase` on `http.host` — Suricata auto-normalizes, making `nocase` redundant | Removed `nocase` from `http.host` content matches |
-| Rule 100006 no detection | Cloudflare ECH hides real domain in TLS SNI | Documented as expected; DNS rule 100001 compensates |
-
----
-
-## 📂 Folder Structure
-
-```
-pa-02-lumma-in-the-room-ah/
-├── iocs/
-│   └── README.md                      # Structured IOCs with confidence levels
-├── rules/
-│   └── PA-02.rules                    # 13 Suricata rules (DNS + TLS + HTTP)
-├── screenshots/                       # Wireshark analysis evidence
-├── validation/                        # fast.log & validation evidence
-├── README.md                          # This file
-├── lessons-learned.md                 # Key concepts & series progression
-└── validation_notes.md                # Rule validation details & fixes
-```
-
----
-
-## 📈 PA-01 vs PA-02 — Series Progression
+## 📈 Series Progression
 
 | Dimension | PA-01 (STRRAT) | PA-02 (Lumma Stealer) |
 |-----------|----------------|----------------------|
 | C2 Protocol | Base64 over raw TCP | HTTP POST over TLS |
-| C2 Visibility | Encrypted — content not inspectable | HTTP content visible |
+| C2 Visibility | Encrypted — not inspectable | HTTP content visible |
 | Rule Approach | Behavioral (port, size, frequency) | Content-match (URI, Host, method) |
 | Infrastructure | Single C2 + LOTS delivery | Five-domain layered relay + Cloudflare |
 | Operator Model | Manual — human operator | Automated — predefined routines |
@@ -159,20 +75,22 @@ pa-02-lumma-in-the-room-ah/
 
 ---
 
-## 🔗 Series Table
+## 🖥️ Lab Environment
 
-| Exercise | Focus | Rules | Status |
-|----------|-------|-------|--------|
-| [PA-01: You Dirty Rat!](../pa-01-you-dirty-rat) | STRRAT — behavioral Suricata rules | 3 | ✅ Complete |
-| **PA-02: Lumma in the Room-ah** | **Lumma Stealer — content-match + layered detection** | **13** | **✅ Complete** |
+| Component | Details |
+|-----------|---------|
+| SOC STATION | Dedicated Kali Linux VM (VMware Workstation) |
+| Analysis Tools | Wireshark, tshark, CyberChef |
+| Detection Engine | Suricata 8.0.3 |
+| PCAP Source | [malware-traffic-analysis.net](https://www.malware-traffic-analysis.net) |
 
 ---
 
 ## 🔗 Links
 
-- **Source PCAP:** [malware-traffic-analysis.net — 2026-01-31](https://www.malware-traffic-analysis.net/2026/01/31/index.html)
 - **Portfolio:** [cyberlandji.com](https://www.cyberlandji.com)
-- **Full Report:** [PA-02 Final Investigation Report](https://github.com/cyberlandji/operation-pcap-autopsy/blob/main/pa-02-lumma-in-the-room-ah/README.md)
+- **LinkedIn:** [linkedin.com/in/yohan-cedric-landji](https://www.linkedin.com/in/yohan-cedric-landji)
+- **Iron Watch Series:** [github.com/cyberlandji](https://github.com/cyberlandji)
 
 ---
 
