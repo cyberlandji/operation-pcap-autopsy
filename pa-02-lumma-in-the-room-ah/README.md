@@ -133,16 +133,15 @@ This operation was deliberately chosen because Lumma's HTTP-based exfiltration a
 
 ```
 pa-02-lumma-in-the-room-ah/
-├── README.md                          # This file
+├── iocs/
+│   └── README.md                      # Structured IOCs with confidence levels
 ├── rules/
 │   └── PA-02.rules                    # 13 Suricata rules (DNS + TLS + HTTP)
-├── iocs/
-│   └── PA-02_IOCs.csv                 # Structured IOC export
-├── validation/
-│   └── screenshots/                   # fast.log validation evidence
-├── report/
-│   └── PA-02_Final_Investigation_Report.md
-└── lessons-learned.md                 # Key concepts & series progression
+├── screenshots/                       # Wireshark analysis evidence
+├── validation/                        # fast.log & validation evidence
+├── README.md                          # This file
+├── lessons-learned.md                 # Key concepts & series progression
+└── validation_notes.md                # Rule validation details & fixes
 ```
 
 ---
@@ -173,7 +172,7 @@ pa-02-lumma-in-the-room-ah/
 
 - **Source PCAP:** [malware-traffic-analysis.net — 2026-01-31](https://www.malware-traffic-analysis.net/2026/01/31/index.html)
 - **Portfolio:** [cyberlandji.com](https://www.cyberlandji.com)
-- **Full Report:** [PA-02 Final Investigation Report](report/PA-02_Final_Investigation_Report.md)
+- **Full Report:** [PA-02 Final Investigation Report](https://github.com/cyberlandji/operation-pcap-autopsy/blob/main/pa-02-lumma-in-the-room-ah/README.md)
 
 ---
 
