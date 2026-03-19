@@ -133,15 +133,16 @@ This operation was deliberately chosen because Lumma's HTTP-based exfiltration a
 
 ```
 pa-02-lumma-in-the-room-ah/
-├── iocs/
+├── 01-iocs/
 │   └── README.md                      # Structured IOCs with confidence levels
-├── rules/
+├── 02-rules/
 │   └── PA-02.rules                    # 13 Suricata rules (DNS + TLS + HTTP)
-├── screenshots/                       # Wireshark analysis evidence
-├── validation/                        # fast.log & validation evidence
+├── 03-screenshots/                       # Wireshark analysis evidence
+├── 04-validation/
+│   ├── validation_notes.md            # Rule validation details & fixes
+│   └── (fast.log screenshots)         # Validation evidence
 ├── README.md                          # This file
-├── lessons-learned.md                 # Key concepts & series progression
-└── validation_notes.md                # Rule validation details & fixes
+└── lessons-learned.md                 # Key concepts & series progression
 ```
 
 ---
