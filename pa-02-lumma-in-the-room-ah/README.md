@@ -137,7 +137,7 @@ pa-02-lumma-in-the-room-ah/
 │   └── README.md                      # Structured IOCs with confidence levels
 ├── 02-rules/
 │   └── PA-02.rules                    # 13 Suricata rules (DNS + TLS + HTTP)
-├── 03-screenshots/                       # Wireshark analysis evidence
+├── 03-screenshots/                    # Wireshark analysis evidence
 ├── 04-validation/
 │   ├── validation_notes.md            # Rule validation details & fixes
 │   └── (fast.log screenshots)         # Validation evidence
