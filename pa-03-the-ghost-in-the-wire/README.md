@@ -143,8 +143,8 @@ pa-03-the-ghost-in-the-wire/
 
 | Operation | Title | Malware Family | Rules | Key Lesson | Status |
 |-----------|-------|---------------|-------|------------|--------|
-| [PA-01](../tree/pa-01-you-dirty-rat/) | You Dirty Rat! | STRRAT | 3 Suricata | Content-match fails on encrypted C2 — rewrite as behavioral | ✅ Complete |
-| [PA-02](../tree/pa-02-lumma-in-the-room-ah/) | Lumma in the Room-ah | Lumma Stealer | 13 Suricata | Cloudflare ECH defeats TLS SNI — layered detection required | ✅ Complete |
+| [PA-01](https://github.com/cyberlandji/operation-pcap-autopsy/tree/main/pa-01-you-dirty-rat) | You Dirty Rat! | STRRAT | 3 Suricata | Content-match fails on encrypted C2 — rewrite as behavioral | ✅ Complete |
+| [PA-02](https://github.com/cyberlandji/operation-pcap-autopsy/tree/main/pa-02-lumma-in-the-room-ah) | Lumma in the Room-ah | Lumma Stealer | 13 Suricata | Cloudflare ECH defeats TLS SNI — layered detection required | ✅ Complete |
 | **PA-03** | **The Ghost in the Wire** | **GhostWeaver RAT** | **16 Suricata + 3 Sigma** | **Empty SNI defeats TLS detection — DNS layer is critical. DGA requires behavioral rules beyond Suricata (Sigma).** | ✅ **Complete** |
 
 ---
