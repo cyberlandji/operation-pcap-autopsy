@@ -53,9 +53,9 @@ The JA3 from the C2 connection identified a Python TLS library, not a browser. T
 
 ---
 
-### 7. TLS 1.2 Is an Attacker OPSEC Gap
+### 7. TLS 1.0 Is an Attacker OPSEC Gap
 
-The C2 server used TLS 1.2 instead of 1.3. TLS 1.3 hides more of the handshake metadata. Using TLS 1.2 exposed the Server Hello details, allowing JA3S fingerprinting. A well-configured attacker would use TLS 1.3 to reduce detection surface.
+The C2 server used TLS 1.0 instead of 1.3. TLS 1.3 hides more of the handshake metadata. Using TLS 1.2 exposed the Server Hello details, allowing JA3S fingerprinting. A well-configured attacker would use TLS 1.3 to reduce detection surface.
 
 **Takeaway:** Not all attackers optimize their OPSEC. When they don't, exploit the gap.
 
