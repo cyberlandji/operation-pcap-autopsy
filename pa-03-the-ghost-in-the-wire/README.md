@@ -62,7 +62,7 @@ soulversr.com             finger.exe callback        DGA .top domains
      ↓    DllImport(user32.dll) + ShowWindowAsync + windowstyle hidden
      ↓
 [Stage 4] DGA resolution → 4ec74y9kph5vko2.top → 173.232.146.62:25658
-     ↓    TLS 1.2, Python client (JA3), 19,619 packets, persistent C2
+     ↓    TLS 1.0, Python client (JA3), 19,619 packets, persistent C2
      ↓
 [Stage 5] Public IP recon — api.ipify.org + checkip.dyndns.org + ipinfo.io
      ↓
