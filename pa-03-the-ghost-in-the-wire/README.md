@@ -19,7 +19,7 @@
 KongTuke              →   MintsLoader            →   GhostWeaver RAT
 (ClickFix lure)           (multi-stage loader)       (Python-based C2)
 soulversr.com             finger.exe callback        DGA .top domains
-                          main.ps1 / wgr.ps1         TLS 1.2 encrypted
+                          main.ps1 / wgr.ps1         TLS 1.0 encrypted
                           AV enumeration             ~20,000 packets
                           conditional delivery        persistent session
 ```
@@ -100,7 +100,7 @@ soulversr.com             finger.exe callback        DGA .top domains
 - **DGA for C2 resilience** — GhostWeaver uses Domain Generation Algorithm with .top TLD. 10+ NXDOMAIN attempts observed, 2 domains resolved (1 primary, 1 fallback unused).
 - **Empty SNI defeats TLS detection** — Primary C2 does not populate SNI in Client Hello. Malware resolves domain via DNS then connects directly to IP. DNS-layer rules are the only domain-level detection for this C2.
 - **Python-based RAT** — JA3 fingerprint identifies Python TLS library, not a browser. JA3 + JA3S combination uniquely fingerprints GhostWeaver C2 infrastructure.
-- **TLS 1.2 = attacker OPSEC gap** — C2 uses TLS 1.2 instead of 1.3, exposing more handshake metadata for defenders.
+- **TLS 1.0 = attacker OPSEC gap** — C2 uses TLS 1.0 instead of 1.3, exposing more handshake metadata for defenders.
 
 ---
 
