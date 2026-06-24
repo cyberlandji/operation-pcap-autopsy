@@ -16,7 +16,7 @@
 
 Operation PCAP Autopsy is a detection-focused investigation series built on real-world malware traffic sourced from [malware-traffic-analysis.net](https://www.malware-traffic-analysis.net).
 
-Each operation targets a different malware family. The workflow is consistent: analyze the traffic, extract IOCs, map to MITRE ATT&CK, write Suricata detection rules based on observed behavior, and prove they fire. Every rule is validated on a dedicated SOC STATION via PCAP replay — not assumed to work.
+Each operation targets a different malware family. The workflow is consistent: analyze the traffic, extract IOCs, map to MITRE ATT&CK, write Suricata detection rules based on observed behavior, and prove they fire. Every rule is validated on a dedicated SOC STATION via PCAP replay — not assumed to work. Detection logic that exceeds Suricata's per-packet model (stateful correlation, log-layer signals) is documented as a Sigma backlog and deferred to Operation Prism Box.
 
 This series complements Operation Iron Watch. Where Iron Watch proves I can build detection infrastructure, PCAP Autopsy proves I can investigate malicious traffic and write detections that actually catch it.
 
@@ -29,7 +29,12 @@ This series complements Operation Iron Watch. Where Iron Watch proves I can buil
 - Suricata detection rule writing and validation
 - Behavioral detection design (encrypted C2 constraints)
 - Content-match detection design (HTTP-based C2)
+- Behavior-over-signature design for dual-use tools (RMM abuse)
+- Protocol/port anomaly detection (cleartext HTTP on TLS ports)
 - JA3 TLS fingerprinting and correlation
+- Threat-intel literacy (VirusTotal triage — detection ratio vs. community score vs. IOC tags)
+- Active Directory traffic analysis (ARP, NBNS, Kerberos, SAMR, DNS/SRV)
+- Sigma backlog identification + log-layer validation paths (Zeek bridge, Atomic Red Team)
 - PCAP replay testing methodology
 - Investigation documentation and analytical reasoning
 
@@ -41,6 +46,8 @@ This series complements Operation Iron Watch. Where Iron Watch proves I can buil
 |----------|---------|-------|-----------|-------------|--------|
 | [PA-01: You Dirty Rat!](pa-01-you-dirty-rat) | STRRAT (Java-based RAT) | 3 | 3/3 | Encrypted C2 defeats content-match rules — behavioral detection required | ✅ Complete |
 | [PA-02: Lumma in the Room-ah](pa-02-lumma-in-the-room-ah) | Lumma Stealer (infostealer) | 13 | 12/13 | Layered detection compensates when Cloudflare ECH blinds TLS inspection | ✅ Complete |
+| [PA-03: The Ghost in the Wire](pa-03-the-ghost-in-the-wire) | GhostWeaver RAT (KongTuke → MintsLoader chain) | 16 + 3 Sigma | 16/16 | Empty SNI defeats TLS detection — DNS layer critical; DGA needs Sigma | ✅ Complete |
+| [PA-04: Easy as 123](pa-04-easy-as-123) | NetSupport Manager RAT (RMM abused as C2) | 7 + 1 Sigma | 7/7 | Behavior over identifier — dual-use tools alert on behavior, not banner; plaintext HTTP on 443 is generic detection | ✅ Complete |
 
 ---
 
@@ -56,22 +63,22 @@ Every operation follows the same repeatable workflow:
 
 **Phase 4 — ATT&CK Mapping:** Map every observed action to MITRE ATT&CK techniques. Only what can be proven from the traffic — not assumptions.
 
-**Phase 5 — Detection Rule Writing:** Write Suricata rules targeting the observed behavior. Broad rules for coverage, precision rules for confidence.
+**Phase 5 — Detection Rule Writing:** Write Suricata rules targeting the observed behavior. Broad rules for coverage, precision rules for confidence. Stateful/log-layer logic captured as a Sigma backlog.
 
-**Phase 6 — Validation:** Replay the original PCAP through Suricata with custom rules. If it doesn't fire, it's not a detection — it's a guess.
+**Phase 6 — Validation:** Replay the original PCAP through Suricata with custom rules. If it doesn't fire, it's not a detection — it's a guess. Always check parse errors before interpreting results.
 
 ---
 
 ## 📈 Series Progression
 
-| Dimension | PA-01 (STRRAT) | PA-02 (Lumma Stealer) |
-|-----------|----------------|----------------------|
-| C2 Protocol | Base64 over raw TCP | HTTP POST over TLS |
-| C2 Visibility | Encrypted — not inspectable | HTTP content visible |
-| Rule Approach | Behavioral (port, size, frequency) | Content-match (URI, Host, method) |
-| Infrastructure | Single C2 + LOTS delivery | Five-domain layered relay + Cloudflare |
-| Operator Model | Manual — human operator | Automated — predefined routines |
-| Key Lesson | Behavioral rules when content is encrypted | Content-match rules when C2 uses HTTP; DNS rules when TLS SNI is hidden |
+| Dimension | PA-01 (STRRAT) | PA-02 (Lumma Stealer) | PA-03 (GhostWeaver RAT) | PA-04 (NetSupport RAT) |
+|-----------|----------------|----------------------|------------------------|------------------------|
+| C2 Protocol | Base64 over raw TCP | HTTP POST over TLS | TLS 1.0 (Python client) + DGA | Plaintext HTTP on port 443 |
+| C2 Visibility | Encrypted — not inspectable | HTTP content visible | Empty SNI — DNS only | Cleartext — fully visible |
+| Rule Approach | Behavioral (port, size, frequency) | Content-match (URI, Host, method) | DNS backup + content + FINGER behavioral | Behavior-over-banner + protocol/port anomaly |
+| Infrastructure | Single C2 + LOTS delivery | Five-domain layered relay + Cloudflare | Multi-actor supply chain (3 actors) | Single C2 IP inside AD enterprise |
+| Operator Model | Manual — human operator | Automated — predefined routines | Active operator session | Established but idle — no tasking in-window |
+| Key Lesson | Behavioral rules when content is encrypted | Content-match rules when C2 uses HTTP; DNS rules when TLS SNI is hidden | Empty SNI → DNS critical; DGA → Sigma | Behavior over identifier; dual-use tool enrichment; capture is a window, not the movie |
 
 ---
 
@@ -81,7 +88,8 @@ Every operation follows the same repeatable workflow:
 |-----------|---------|
 | SOC STATION | Dedicated Kali Linux VM (VMware Workstation) |
 | Analysis Tools | Wireshark, tshark, CyberChef |
-| Detection Engine | Suricata 8.0.3 |
+| Detection Engine | Suricata 8.0.5 |
+| Threat Intel | VirusTotal |
 | PCAP Source | [malware-traffic-analysis.net](https://www.malware-traffic-analysis.net) |
 
 ---
