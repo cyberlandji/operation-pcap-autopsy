@@ -1,0 +1,173 @@
+# PA-04 — Lessons Learned
+
+## Operation: "Easy as 123"
+## Malware: NetSupport Manager RAT (legitimate RMM abused as C2)
+
+---
+
+### 1. Behavior Decides, Not the Identifier
+
+This operation hit the same trap four different ways — and each one was a *label* that
+felt like a verdict but wasn't:
+- A playful domain name (`EASYAS123`) that turned out to be the **victim org's own AD
+  domain**, not the attacker.
+- A "Phishing IOC" tag on `armmf.adobe.com` — a clean Adobe domain (VirusTotal 0/92).
+- A `-41` VirusTotal **community score** on `g.live.com` — clean by every engine (0/91).
+- "Unusual" **JA3** fingerprints from non-browser legitimate clients (updaters, OS
+  services).
+
+Every alarming surface signal was overridden by **converging behavioral evidence**.
+
+**Takeaway:** A name, a tag, a score, or a fingerprint never decides maliciousness —
+the behavior does. Weigh converging evidence; discount lone scary labels.
+
+---
+
+### 2. NetSupport Is Dual-Use — Alert on Behavior, Enrich With the Banner
+
+NetSupport Manager is a legitimate, commercially-sold remote-administration tool that
+is heavily abused. The client User-Agent (`NetSupport Manager/1.3`) and server banner
+(`NetSupport Gateway/1.92`) are **identical** in legitimate and malicious use — the
+banner doesn't know it's being abused. A rule that simply flags "NetSupport present"
+is a *signature*, and in an environment that uses NetSupport legitimately, it floods.
+
+**Takeaway:** For dual-use tools (NetSupport, PsExec, RDP, certutil...), the tool
+identifier is rarely the right *trigger* — it fires on legit use too. Trigger on the
+malicious-specific **behavior** (external C2 destination, the `CMD=` protocol,
+plaintext-on-443) and let the identifier **enrich** the alert. Identifier = context;
+behavior = trigger.
+
+---
+
+### 3. Plaintext HTTP on Port 443 Is Generic, Durable Detection
+
+The C2 ran **cleartext HTTP on port 443** — the TLS port — with no TLS handshake.
+Port 443 is a *convention*, not a rule; the software at each end decides what runs over
+it. This choice blends into expected outbound-443 traffic and dodges TLS-oriented
+inspection. The rule that detects it (`alert http ... 443`) names neither NetSupport
+nor any IOC — it catches a whole *class* of evasion.
+
+**Takeaway:** Protocol/port mismatch (HTTP where TLS is expected) is a behavioral rule
+that survives IOC rotation. The strongest detections target *anomalies of behavior*,
+not specific indicators. Tune before promoting from hunt to alert.
+
+---
+
+### 4. The Evasion Choice Was Also an OPSEC Gap
+
+By disguising on port 443 but skipping TLS, the attacker traded **content
+confidentiality for port-based blending**. The cost: the entire `CMD=POLL` / `CMD=ENCD`
+command protocol was left readable. A real HTTPS C2 would have shown nothing but
+encrypted bytes.
+
+**Takeaway:** Same pattern as PA-03's TLS 1.0 gap — attackers don't always optimize
+OPSEC. When the evasion at one layer exposes content at another, exploit the gap.
+
+---
+
+### 5. POST-First Means the Client Was Already Resident
+
+The C2 stream opened with a **POST as its first HTTP request** — no preceding GET or
+retrieval. A GET-first pattern would suggest the host was *downloading* something;
+POST-first means the host immediately *reported in*, which only an already-installed
+client does.
+
+**Takeaway:** The first verb on a channel tells you its nature. POST-first = resident
+client checking in = the compromise predates this traffic. This is *positive* evidence
+of an out-of-window infection, not merely absence of a delivery step.
+
+---
+
+### 6. The Capture Is a Window, Not the Movie
+
+The capture opened with normal host-startup activity (DHCP, ARP, NBNS, Kerberos, DNS).
+No delivery, download, or initial-access step preceded the first C2 contact — confirmed
+by a whole-capture GET review returning only benign Microsoft/Akamai traffic. The
+infection happened **before recording began**.
+
+**Takeaway:** Network-only evidence has a hard horizon backward in time. State findings
+as bounded by what the capture contains ("earliest observable malicious activity
+is..."), never as the whole story. Initial access being out-of-window is a limitation
+to mark honestly, not a gap to paper over.
+
+---
+
+### 7. Verdict From the Target, Not the Timing
+
+The SAMR activity (`LookupNames` → `OpenUser` → `GetGroupsForUser`) *looked* like
+account enumeration. The deciding question was not "when did it happen" but "whose
+account was queried." It resolved to RID **1103 = brolf**, the logged-in user → benign
+logon token-building, not recon.
+
+**Takeaway:** "Earlier in the capture therefore benign" is a trap. Judge dual-purpose
+protocol activity (SAMR, LSARPC, DRSUAPI) by **source, breadth, and target** — what it
+*did* — not by where it sits in the timeline.
+
+---
+
+### 8. Encoded Is Not Encrypted
+
+The steady-state `DATA=` payload was **byte-for-byte identical** across every beacon.
+That repetition is itself the tell: real encryption randomizes output (IV/nonce), so
+identical input would still produce differing ciphertext. Identical output ⇒ reversible
+**encoding**, not cryptography — a fixed encoded keepalive token.
+
+**Takeaway:** Repetition distinguishes encoding from encryption. Don't call obfuscated
+data "encrypted" — and don't claim to know what an encoded payload *means* without
+decoding it. State the boundary: "constant encoded keepalive token," not "the message
+says X."
+
+---
+
+### 9. Uniform Beacon = Established but Idle C2
+
+After the setup burst, the channel settled into a **uniform 286-byte POST every ~60s**
+to the end of the capture. No size swelling, no cadence break. That uniformity *is* the
+finding: the C2 was established and maintained, but **no operator tasking occurred
+in-window**.
+
+**Takeaway:** A flat, fixed-interval beacon is a real, reportable conclusion — "C2 live
+but idle." Don't imply commands were executed when the evidence shows only keepalive.
+Beacon regularity (machine-like 60s) is also a strong threat-intel attribute.
+
+---
+
+### 10. "Didn't Fire" Has Two Causes — Check Parse Errors First
+
+First rule run: only 3/7 fired. The cause was **not** logic — four rules had leftover
+placeholder text and were **rejected at parse time**, never tested against traffic.
+They didn't "fail to match"; they never loaded.
+
+**Takeaway:** Always read the engine's startup parse errors *before* interpreting
+`fast.log`. A rule that didn't load tells you nothing about the traffic. Distinguish
+*parsed-but-didn't-match* (a real result) from *failed-to-parse* (a syntax problem).
+
+---
+
+### 11. Stateful Detection Lives in the Log Layer
+
+The ~60s beacon cadence is a strong behavioral signal, but detecting "same host POSTs
+to same dest every 60s" needs **stateful counting/timing across many events** — beyond
+Suricata's per-flow model. It belongs in Sigma/SIEM (or a Zeek script), validated
+against **logs**, not packets.
+
+**Takeaway:** Same boundary as PA-03's DGA deferrals — stateful logic is log-layer, not
+IDS-layer. A PCAP can be bridged to logs via **Zeek** (network-data rules), but
+host-level rules require simulated endpoint telemetry (Atomic Red Team). You validate
+against the *behavior*, not the original sample.
+
+---
+
+### Cross-Operation Progression
+
+| Lesson Area | PA-01 | PA-02 | PA-03 | PA-04 |
+|-------------|-------|-------|-------|-------|
+| Encrypted C2 | Content-match fails on encrypted traffic | Cloudflare ECH defeats TLS SNI | Empty SNI defeats TLS detection | Plaintext-on-443: evasion that exposes content |
+| Detection approach | Behavioral port-based rules | Layered DNS + TLS SNI + HTTP content | DNS backup + Sigma for DGA | Behavior-over-banner; protocol/port anomaly |
+| Rule complexity | 3 simple rules | 13 rules across 3 layers | 16 rules + 3 Sigma | 7 rules across 3 tiers + 1 Sigma |
+| Investigation depth | Single-stage RAT | Multi-domain infostealer | Multi-actor supply chain | AD intrusion in high-noise enterprise capture |
+| Key innovation | Rewriting content rules as behavioral | Kill chain stage labels in msg | Sigma backlog, rule debugging as documentation | Dual-use enrichment logic; window-not-the-movie scoping; Zeek/Sigma validation paths |
+
+---
+
+*PA-04 lessons learned — Operation PCAP Autopsy — cyberlandji*
