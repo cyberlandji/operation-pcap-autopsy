@@ -1,0 +1,10 @@
+type,value,context,confidence,notes
+domain,vadusa.xyz,C2 domain,high,Resolved via internal DNS to 45.131.214.85
+ip,45.131.214.85,C2 server,high,Standalone hosting IP; plaintext HTTP on port 443
+url,http://45.131.214.85/fakeurl.htm,C2 endpoint,high,Absolute-form request URI; POST target
+http-user-agent,NetSupport Manager/1.3,C2 client identifier,high,NetSupport RAT client banner (request)
+http-server,NetSupport Gateway/1.92 (Windows NT),C2 server identifier,high,NetSupport gateway banner (response)
+protocol-string,CMD=POLL,C2 command,high,Keepalive/poll check-in command in POST body
+protocol-string,CMD=ENCD,C2 command,high,Encoded-data command in POST body
+behaviour,Plaintext HTTP on port 443,Evasion/blending,high,Cleartext HTTP on TLS port; no TLS handshake
+behaviour,~60s fixed-interval POST beacon,C2 cadence,high,Idle keepalive after setup burst; uniform 286-byte payload
