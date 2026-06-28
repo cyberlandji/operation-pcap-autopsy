@@ -13,7 +13,6 @@ alert dns $HOME_NET any -> any any (msg:"PA-02 - Lumma Stealer - DNS query to wh
 
 #TLS rule
 
-alert tls $HOME_NET any -> $EXTERNAL_NET 443 (msg:"PA-02 - Lumma Stealer - TLS SNI to hiyter.com (initial beacon)"; tls.sni; content:"hiyter.com"; nocase; sid:100006; rev:1;)
 
 alert tls $HOME_NET any -> $EXTERNAL_NET 443 (msg:"PA-02 - Lumma Stealer - TLS SNI to whooptm (staging/config)"; tls.sni; content:"whooptm.cyou"; nocase; sid:100007; rev:1;)
 
